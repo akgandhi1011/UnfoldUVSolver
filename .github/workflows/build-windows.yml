@@ -1,0 +1,56 @@
+name: Build RotateUV Professional V3.4
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/autoseam_worker.cpp'
+      - 'Rotate_UV_PRO_NATIVE_UNFOLD_V2.ms'
+      - 'Rotate_UV_PRO_NATIVE_UNFOLD_V2.mcr'
+      - '.github/workflows/build-windows.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable MSVC x64
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Prepare output
+        shell: cmd
+        run: if not exist dist mkdir dist
+
+      - name: Build Auto Seam worker
+        shell: cmd
+        run: cl /nologo /O2 /DNDEBUG /std:c++17 /EHsc /MD src\autoseam_worker.cpp /Fe:dist\RotateUV_AutoSeam.exe
+
+      - name: Verify worker
+        shell: pwsh
+        run: |
+          $ver = & 'dist\RotateUV_AutoSeam.exe' --version
+          if ($LASTEXITCODE -ne 0) { throw "Auto Seam --version failed" }
+          Write-Host $ver
+          if ($ver -notmatch 'RotateUV_AutoSeam\s+3\.4\.0') { throw "Unexpected Auto Seam version: $ver" }
+
+      - name: Copy runtime files
+        shell: pwsh
+        run: |
+          Copy-Item Rotate_UV_PRO_NATIVE_UNFOLD_V2.ms dist\ -Force
+          Copy-Item Rotate_UV_PRO_NATIVE_UNFOLD_V2.mcr dist\ -Force
+          Copy-Item README.md dist\README.md -Force
+          Copy-Item CHANGES.md dist\CHANGES.md -Force
+          Copy-Item THIRD_PARTY_NOTICES.md dist\THIRD_PARTY_NOTICES.md -Force
+
+      - name: Upload Windows package
+        uses: actions/upload-artifact@v4
+        with:
+          name: RotateUV-Professional-V3.4-Windows
+          path: dist/*
+          if-no-files-found: error
