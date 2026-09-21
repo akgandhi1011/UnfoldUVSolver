@@ -1,4 +1,4 @@
-# RotateUV Professional V3.4
+# RotateUV Professional V3.4.1
 
 Clean one-worker repository for the Rotate UV tool.
 
@@ -15,7 +15,7 @@ UV opening is performed by **3ds Max native Unfold3D** through MAXScript:
 
 There is no external unfold EXE, no libigl/Eigen checkout, no reference OBJ in the repository, and no seam-profile dropdown.
 
-## Important V3.4 runtime behavior
+## Important V3.4.1 runtime behavior
 
 `Generate` only analyzes the mesh and does not modify it.
 
@@ -32,6 +32,19 @@ Workflow:
 3. Apply
 4. Unfold
 
+
+## V3.4.1 UI alignment update
+
+The compact rollout now follows the requested order:
+
+1. MODE
+2. ROTATE
+3. ALIGN
+4. ARRANGE ELEMENTS
+5. SEAM / UNFOLD / STRAIGHTEN
+
+The ALIGN row contains six controls: the existing Horizontal/Vertical orientation tools followed by **Bottom, Top, Left and Right shell-bound alignment**. Bottom/Top/Left/Right work on the currently selected UV shells; when there is no UV selection they operate on all shells. They only translate shells and do not change shell scale, rotation, seams or topology.
+
 ## Supported target versions
 
 The native Unfold3D MAXScript methods are available in 3ds Max 2022.2 and newer. This repository is intended primarily for 3ds Max 2026/2027.
@@ -41,9 +54,9 @@ The native Unfold3D MAXScript methods are available in 3ds Max 2022.2 and newer.
 1. Create a new empty GitHub repository.
 2. Upload the **contents** of this folder to the repository root.
 3. Open **Actions**.
-4. Select **Build RotateUV Professional V3.4**.
+4. Select **Build RotateUV Professional V3.4.1**.
 5. Click **Run workflow**.
-6. Download the artifact named `RotateUV-Professional-V3.4-Windows`.
+6. Download the artifact named `RotateUV-Professional-V3.4.1-Windows`.
 
 The artifact contains:
 

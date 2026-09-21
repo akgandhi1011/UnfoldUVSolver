@@ -1,5 +1,15 @@
 # Changes
 
+## V3.4.1 - Align Layout + Four Shell Edge Align Tools
+
+- Reordered the rollout to match the requested compact layout: ROTATE first, then a full-width ALIGN row.
+- Kept the existing Horizontal and Vertical orientation tools unchanged.
+- Added Bottom Align, Top Align, Left Align and Right Align in the four requested ALIGN positions.
+- New edge-align commands translate complete selected UV shells to the shared bounding edge without changing scale, rotation, seams or topology.
+- With no active UV selection, the four new align commands operate on all UV shells.
+- ARRANGE ELEMENTS and SEAM / UNFOLD / STRAIGHTEN behavior is unchanged; those blocks were only moved down to make room for the new ALIGN row.
+- AutoSeam worker source and seam-generation logic are unchanged from V3.4.0.
+
 ## V3.4.0 - Clean New Repository
 
 - One external worker only: `RotateUV_AutoSeam.exe`.

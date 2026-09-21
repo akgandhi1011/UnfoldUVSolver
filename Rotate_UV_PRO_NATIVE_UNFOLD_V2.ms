@@ -20,8 +20,9 @@
     - Unfold3D uses explicit Peel seams; no seam = no destructive solve
     - Pro quad-grid Straighten UV / Straighten Shell
     - Rotation presets and custom angle
-    - Auto compact-fit Horizontal / Vertical alignment using true UV connected components
-    - Manual selected-edge Horizontal / Vertical alignment
+    - Auto compact-fit Horizontal / Vertical orientation using true UV connected components
+    - Manual selected-edge Horizontal / Vertical orientation
+    - Bottom / Top / Left / Right shell-bound alignment
     - Max-style Arrange Elements UI using native EditUVW icons
     - Horizontal row / Vertical column UV island arrangement
     - Compact Block H/V with optional Rotate, Rescale and Fill Gaps
@@ -90,56 +91,61 @@ fn RotateUV_Open =
         checkButton chk_capture "CAPTURE ISLANDS" pos:[101,42] width:102 height:18 highlightColor:(color 55 150 70) tooltip:"Capture the current UV shell scope for repeated rotation commands."
         button btn_help "?" pos:[273,42] width:18 height:18 tooltip:"About / Help"
 
-        -- ALIGN and ROTATE share one compact row.
-        groupBox grp_align "ALIGN" pos:[6,70] width:58 height:90
-        button btn_alignHoriz "" pos:[17,88] width:34 height:28 iconName:@"UVWUnwrapDialog\AlignHorizontal" iconSize:[22,22] tooltip:"Align Horizontal - Auto finds the most compact orientation for each target shell. Manual uses the selected reference edge."
-        button btn_alignVert "" pos:[17,124] width:34 height:28 iconName:@"UVWUnwrapDialog\AlignVertical" iconSize:[22,22] tooltip:"Align Vertical - Auto finds the most compact orientation for each target shell. Manual uses the selected reference edge."
+        -- ROTATE is full-width, matching the requested compact layout.
+        groupBox grp_presets "ROTATE" pos:[6,70] width:292 height:90
+        button btn_m90 "" pos:[17,88] width:34 height:28 iconName:@"UVWUnwrapDialog\Rotate-90" iconSize:[21,21] tooltip:"Rotate captured shells -90 degrees."
+        button btn_m45 "-45" pos:[68,88] width:34 height:28 tooltip:"Rotate captured shells -45 degrees."
+        button btn_p45 "+45" pos:[118,88] width:34 height:28 tooltip:"Rotate captured shells +45 degrees."
+        button btn_p90 "" pos:[168,88] width:34 height:28 iconName:@"UVWUnwrapDialog\Rotate90" iconSize:[21,21] tooltip:"Rotate captured shells +90 degrees."
+        button btn_180 "180" pos:[238,88] width:40 height:28 tooltip:"Rotate captured shells 180 degrees."
 
-        groupBox grp_presets "ROTATE" pos:[69,70] width:229 height:90
-        button btn_m90 "" pos:[79,88] width:34 height:28 iconName:@"UVWUnwrapDialog\Rotate-90" iconSize:[21,21] tooltip:"Rotate captured shells -90 degrees."
-        button btn_m45 "-45" pos:[119,88] width:34 height:28 tooltip:"Rotate captured shells -45 degrees."
-        button btn_p45 "+45" pos:[159,88] width:34 height:28 tooltip:"Rotate captured shells +45 degrees."
-        button btn_p90 "" pos:[199,88] width:34 height:28 iconName:@"UVWUnwrapDialog\Rotate90" iconSize:[21,21] tooltip:"Rotate captured shells +90 degrees."
-        button btn_180 "180" pos:[239,88] width:40 height:28 tooltip:"Rotate captured shells 180 degrees."
+        spinner spn_angle "Custom Angle:" pos:[17,124] width:154 fieldWidth:48 range:[0.0,360.0,15.0] type:#float scale:1.0
+        button btn_ccw "CCW" pos:[190,121] width:40 height:23 tooltip:"Rotate counter-clockwise by Custom Angle."
+        button btn_cw "CW" pos:[238,121] width:40 height:23 tooltip:"Rotate clockwise by Custom Angle."
 
-        spinner spn_angle "Custom Angle:" pos:[79,124] width:120 fieldWidth:48 range:[0.0,360.0,15.0] type:#float scale:1.0
-        button btn_ccw "CCW" pos:[207,121] width:35 height:23 tooltip:"Rotate counter-clockwise by Custom Angle."
-        button btn_cw "CW" pos:[247,121] width:32 height:23 tooltip:"Rotate clockwise by Custom Angle."
+        -- ALIGN is one full-width row: orient H/V, then Bottom / Top / Left / Right.
+        groupBox grp_align "ALIGN" pos:[6,165] width:292 height:55
+        button btn_alignHoriz "" pos:[17,183] width:34 height:28 iconName:@"UVWUnwrapDialog\AlignHorizontal" iconSize:[22,22] tooltip:"Orient Horizontal - Auto finds the most compact horizontal orientation for each target shell. Manual uses the selected reference edge."
+        button btn_alignVert "" pos:[62,183] width:34 height:28 iconName:@"UVWUnwrapDialog\AlignVertical" iconSize:[22,22] tooltip:"Orient Vertical - Auto finds the most compact vertical orientation for each target shell. Manual uses the selected reference edge."
+        button btn_alignBottom "B" pos:[107,183] width:34 height:28 tooltip:"Bottom Align - align the bottom bounds of selected UV shells. No UV selection = all shells."
+        button btn_alignTop "T" pos:[152,183] width:34 height:28 tooltip:"Top Align - align the top bounds of selected UV shells. No UV selection = all shells."
+        button btn_alignLeft "L" pos:[197,183] width:34 height:28 tooltip:"Left Align - align the left bounds of selected UV shells. No UV selection = all shells."
+        button btn_alignRight "R" pos:[242,183] width:34 height:28 tooltip:"Right Align - align the right bounds of selected UV shells. No UV selection = all shells."
 
-        groupBox grp_arrange "ARRANGE ELEMENTS" pos:[6,165] width:292 height:108
+        groupBox grp_arrange "ARRANGE ELEMENTS" pos:[6,225] width:292 height:108
 
         -- Native 3ds Max UV icons: theme-aware and DPI-aware.
-        button btn_arrangeHoriz "" pos:[17,184] width:34 height:31 iconName:@"EditUVW\SpaceHorizontally" iconSize:[23,23] tooltip:"Horizontal Row - arrange target shells left-to-right."
-        button btn_arrangeVert "" pos:[72,184] width:34 height:31 iconName:@"EditUVW\SpaceVertically" iconSize:[23,23] tooltip:"Vertical Column - arrange target shells top-to-bottom."
-        button btn_compactH "" pos:[127,184] width:34 height:31 iconName:@"EditUVW\PackTogether" iconSize:[23,23] tooltip:"Compact Block H - landscape-biased compact block."
-        button btn_compactV "" pos:[182,184] width:34 height:31 iconName:@"EditUVW\PackCustom" iconSize:[23,23] tooltip:"Compact Block V - portrait-biased compact block."
-        button btn_rescaleNow "" pos:[237,184] width:34 height:31 iconName:@"EditUVW\RescaleElements" iconSize:[23,23] tooltip:"Rescale Elements now - normalize relative cluster scale for target shells."
+        button btn_arrangeHoriz "" pos:[17,244] width:34 height:31 iconName:@"EditUVW\SpaceHorizontally" iconSize:[23,23] tooltip:"Horizontal Row - arrange target shells left-to-right."
+        button btn_arrangeVert "" pos:[72,244] width:34 height:31 iconName:@"EditUVW\SpaceVertically" iconSize:[23,23] tooltip:"Vertical Column - arrange target shells top-to-bottom."
+        button btn_compactH "" pos:[127,244] width:34 height:31 iconName:@"EditUVW\PackTogether" iconSize:[23,23] tooltip:"Compact Block H - landscape-biased compact block."
+        button btn_compactV "" pos:[182,244] width:34 height:31 iconName:@"EditUVW\PackCustom" iconSize:[23,23] tooltip:"Compact Block V - portrait-biased compact block."
+        button btn_rescaleNow "" pos:[237,244] width:34 height:31 iconName:@"EditUVW\RescaleElements" iconSize:[23,23] tooltip:"Rescale Elements now - normalize relative cluster scale for target shells."
 
-        checkbox cb_arrRotate "Rotate" pos:[14,224] width:56 height:18 checked:true tooltip:"Compact-orient each target shell before arrangement."
-        checkbox cb_arrRescale "Rescale" pos:[73,224] width:60 height:18 checked:false tooltip:"Normalize relative cluster scale before arrangement. OFF preserves current texel scale."
-        checkbox cb_fillGaps "Fill Gaps" pos:[136,224] width:68 height:18 checked:true tooltip:"Compact Block only: use smaller/thinner shells to fill available free spaces."
-        spinner spn_spacing "Padding:" pos:[205,222] width:84 fieldWidth:40 range:[0.0,100.0,0.01] type:#float scale:0.001 tooltip:"Exact UV-space gap between arranged shell bounding boxes."
-        label lbl_arrangeScope "Selected shells only   |   No selection = all shells" pos:[14,249] width:276 height:15 align:#center
+        checkbox cb_arrRotate "Rotate" pos:[14,284] width:56 height:18 checked:true tooltip:"Compact-orient each target shell before arrangement."
+        checkbox cb_arrRescale "Rescale" pos:[73,284] width:60 height:18 checked:false tooltip:"Normalize relative cluster scale before arrangement. OFF preserves current texel scale."
+        checkbox cb_fillGaps "Fill Gaps" pos:[136,284] width:68 height:18 checked:true tooltip:"Compact Block only: use smaller/thinner shells to fill available free spaces."
+        spinner spn_spacing "Padding:" pos:[205,282] width:84 fieldWidth:40 range:[0.0,100.0,0.01] type:#float scale:0.001 tooltip:"Exact UV-space gap between arranged shell bounding boxes."
+        label lbl_arrangeScope "Selected shells only   |   No selection = all shells" pos:[14,309] width:276 height:15 align:#center
 
         -- SEAM / UNFOLD / STRAIGHTEN - explicit seam-first workflow.
-        groupBox grp_unfold "SEAM / UNFOLD / STRAIGHTEN" pos:[6,278] width:292 height:91
+        groupBox grp_unfold "SEAM / UNFOLD / STRAIGHTEN" pos:[6,338] width:292 height:91
 
         -- Row 1: native seam optimization. Generate never changes the Max mesh/UV topology.
-        button btn_seamAnalyze "" pos:[14,292] width:34 height:29 iconName:@"EditUVW\FlattenByPolygonAngle" iconSize:[22,22] tooltip:"Generate Professional Auto Seam - one automatic topology-aware Minimal-Seam policy. No profile selection. Proposal only; the mesh is unchanged until Apply."
-        button btn_seamPreview "" pos:[54,292] width:34 height:29 iconName:@"EditUVW\EditSeams" iconSize:[22,22] tooltip:"Preview Native Auto Seam - selects the proposed internal seam edges on the current Max mesh. Open mesh borders are not proposed."
-        button btn_seamApply "" pos:[94,292] width:34 height:29 iconName:@"EditUVW\ConvertEdgeToSeams" iconSize:[22,22] tooltip:"Apply Native Auto Seam - rebuilds the UV mapping from a clean state, then replaces the Peel/Pelt seam set with this proposal."
-        label lbl_autoSeamMode "PRO MINIMAL SEAMS" pos:[139,298] width:145 height:16 align:#center tooltip:"One automatic structural seam mode. No seam-profile dropdown: the planner decides the appropriate cut strategy from topology and shape."
+        button btn_seamAnalyze "" pos:[14,352] width:34 height:29 iconName:@"EditUVW\FlattenByPolygonAngle" iconSize:[22,22] tooltip:"Generate Professional Auto Seam - one automatic topology-aware Minimal-Seam policy. No profile selection. Proposal only; the mesh is unchanged until Apply."
+        button btn_seamPreview "" pos:[54,352] width:34 height:29 iconName:@"EditUVW\EditSeams" iconSize:[22,22] tooltip:"Preview Native Auto Seam - selects the proposed internal seam edges on the current Max mesh. Open mesh borders are not proposed."
+        button btn_seamApply "" pos:[94,352] width:34 height:29 iconName:@"EditUVW\ConvertEdgeToSeams" iconSize:[22,22] tooltip:"Apply Native Auto Seam - rebuilds the UV mapping from a clean state, then replaces the Peel/Pelt seam set with this proposal."
+        label lbl_autoSeamMode "PRO MINIMAL SEAMS" pos:[139,358] width:145 height:16 align:#center tooltip:"One automatic structural seam mode. No seam-profile dropdown: the planner decides the appropriate cut strategy from topology and shape."
 
         -- Row 2: solve and finishing tools.
-        button btn_unfold "" pos:[18,329] width:34 height:31 iconName:@"EditUVW\QuickPeel" iconSize:[23,23] tooltip:"Unfold - uses 3ds Max Unfold3D from the applied seam set. No second external unfold worker."
-        button btn_optimize "" pos:[58,329] width:34 height:31 iconName:@"EditUVW\RelaxUntilFlat" iconSize:[23,23] tooltip:"Optimize - gentle Unfold3D relaxation. It never creates or changes seams."
-        button btn_straightenUV "" pos:[98,329] width:34 height:31 iconName:@"EditUVW\StraightenSelection" iconSize:[23,23] tooltip:"Straighten UV - rectangularize selected quad-grid UV patches. Preserves patch center and 3D-proportional row/column spacing."
-        button btn_straightenShell "" pos:[138,329] width:34 height:31 iconName:@"MainUI\Shell" iconSize:[23,23] tooltip:"Straighten Shell - promote selection to complete shells and rectangularize each valid quad-grid shell independently."
-        label lbl_unfoldScope "Seams -> Max Unfold" pos:[176,336] width:112 height:16 align:#center tooltip:"Recommended workflow: Generate -> Preview -> Apply -> Unfold. Auto Seam uses one external worker; UV opening uses 3ds Max Unfold3D."
+        button btn_unfold "" pos:[18,389] width:34 height:31 iconName:@"EditUVW\QuickPeel" iconSize:[23,23] tooltip:"Unfold - uses 3ds Max Unfold3D from the applied seam set. No second external unfold worker."
+        button btn_optimize "" pos:[58,389] width:34 height:31 iconName:@"EditUVW\RelaxUntilFlat" iconSize:[23,23] tooltip:"Optimize - gentle Unfold3D relaxation. It never creates or changes seams."
+        button btn_straightenUV "" pos:[98,389] width:34 height:31 iconName:@"EditUVW\StraightenSelection" iconSize:[23,23] tooltip:"Straighten UV - rectangularize selected quad-grid UV patches. Preserves patch center and 3D-proportional row/column spacing."
+        button btn_straightenShell "" pos:[138,389] width:34 height:31 iconName:@"MainUI\Shell" iconSize:[23,23] tooltip:"Straighten Shell - promote selection to complete shells and rectangularize each valid quad-grid shell independently."
+        label lbl_unfoldScope "Seams -> Max Unfold" pos:[176,396] width:112 height:16 align:#center tooltip:"Recommended workflow: Generate -> Preview -> Apply -> Unfold. Auto Seam uses one external worker; UV opening uses 3ds Max Unfold3D."
 
         -- Slim footer: status left, creator credit right.
-        label lbl_status "Ready." pos:[7,375] width:190 height:17
-        dotNetControl lbl_credit "System.Windows.Forms.Label" pos:[203,375] width:96 height:17
+        label lbl_status "Ready." pos:[7,435] width:190 height:17
+        dotNetControl lbl_credit "System.Windows.Forms.Label" pos:[203,435] width:96 height:17
 
         ----------------------------------------------------------------------
         -- Helpers
@@ -1367,6 +1373,100 @@ fn RotateUV_Open =
                 )
                 catch(ok = false)
                 ok
+            )
+        )
+
+        fn alignShellBounds edgeMode =
+        (
+            if isBusy then false
+            else
+            (
+                isBusy = true
+                uv = resolveUnwrap()
+                local result = false
+
+                if ensureUnwrapReady() then
+                (
+                    local selectionData = getCurrentSelectionAsVertices()
+                    local allTopologyIslands = buildAllUVIslands()
+                    local topologyIslands = filterTopologyIslandsBySelection allTopologyIslands selectionData
+                    local items = buildArrangementItems topologyIslands
+                    local totalCount = items.count
+
+                    if totalCount < 1 then
+                    (
+                        if selectionData != undefined do restoreUVSelection selectionData
+                        messageBox "No valid UV shells could be detected in the active Unwrap." title:"Rotate UV"
+                        setStatus "Align: no UV shells detected."
+                    )
+                    else
+                    (
+                        local targetValue = undefined
+                        case edgeMode of
+                        (
+                            #bottom: for item in items do if targetValue == undefined or item[2][2] < targetValue do targetValue = item[2][2]
+                            #top:    for item in items do if targetValue == undefined or item[2][4] > targetValue do targetValue = item[2][4]
+                            #left:   for item in items do if targetValue == undefined or item[2][1] < targetValue do targetValue = item[2][1]
+                            #right:  for item in items do if targetValue == undefined or item[2][3] > targetValue do targetValue = item[2][3]
+                        )
+
+                        local successCount = 0
+                        local oldElementMode = undefined
+                        local oldLock = undefined
+                        try(oldElementMode = uv.getTVElementMode())catch(oldElementMode = undefined)
+                        try(oldLock = uv.getLock())catch(oldLock = undefined)
+
+                        undo "Align UV Shell Bounds" on
+                        (
+                            try(uv.setTVElementMode false)catch()
+                            try(uv.setLock false)catch()
+                            try(uv.setTVSubObjectMode 1)catch()
+
+                            for item in items do
+                            (
+                                local islandData = item[1]
+                                local bb = item[2]
+                                local offset = [0.0, 0.0, 0.0]
+
+                                case edgeMode of
+                                (
+                                    #bottom: offset.y = targetValue - bb[2]
+                                    #top:    offset.y = targetValue - bb[4]
+                                    #left:   offset.x = targetValue - bb[1]
+                                    #right:  offset.x = targetValue - bb[3]
+                                )
+
+                                if (abs offset.x) <= 0.00000001 and (abs offset.y) <= 0.00000001 then
+                                    successCount += 1
+                                else if moveIslandVerts islandData[1] offset do
+                                    successCount += 1
+                            )
+
+                            if oldLock != undefined do try(uv.setLock oldLock)catch()
+                            if oldElementMode != undefined do try(uv.setTVElementMode oldElementMode)catch()
+                            if selectionData != undefined do restoreUVSelection selectionData
+                        )
+
+                        try(uv.updateMap())catch()
+                        try(uv.invalidateView())catch()
+                        try(redrawViews())catch()
+
+                        local alignLabel = case edgeMode of
+                        (
+                            #bottom: "Bottom"
+                            #top: "Top"
+                            #left: "Left"
+                            #right: "Right"
+                            default: "Bounds"
+                        )
+                        local scopeLabel = selectionScopeLabel selectionData
+                        setStatus ((successCount as string) + "/" + (totalCount as string) + " " + scopeLabel + " shells -> " + alignLabel + " Align.")
+                        result = (successCount > 0)
+                    )
+                )
+
+                isBusy = false
+                result
             )
         )
 
@@ -3740,6 +3840,10 @@ Use Auto Seam: Generate -> Preview -> Apply, or define seams manually in Edit UV
 
         on btn_alignHoriz pressed do alignCurrentSelection #horizontal
         on btn_alignVert pressed do alignCurrentSelection #vertical
+        on btn_alignBottom pressed do alignShellBounds #bottom
+        on btn_alignTop pressed do alignShellBounds #top
+        on btn_alignLeft pressed do alignShellBounds #left
+        on btn_alignRight pressed do alignShellBounds #right
 
         on btn_arrangeHoriz pressed do arrangeAllUVIslands #horizontal
         on btn_arrangeVert pressed do arrangeAllUVIslands #vertical
@@ -3773,6 +3877,7 @@ Use Auto Seam: Generate -> Preview -> Apply, or define seams manually in Edit UV
                 "Manual - Selected Edge       Selected edge controls alignment\n" +
                 "Capture Islands              Stores current shell scope for repeated rotation\n" +
                 "Align H / V icons            Orient target shells horizontally / vertically\n" +
+                "Bottom / Top / Left / Right  Align selected shell bounding edges; no selection = all shells\n" +
                 "Row H / Col V                Simple row or column arrangement\n" +
                 "Block H / Block V            Compact landscape / portrait arrangement\n" +
                 "Rescale icon                 Rescale target UV clusters now\n" +
@@ -3822,13 +3927,13 @@ Use Auto Seam: Generate -> Preview -> Apply, or define seams manually in Edit UV
 
     try
     (
-        createDialog rol_RotateUV 304 401 \
+        createDialog rol_RotateUV 304 461 \
             style:#(#style_titlebar, #style_sysmenu, #style_toolwindow) \
             parent:toolParentHWND lockWidth:true lockHeight:true
     )
     catch
     (
-        createDialog rol_RotateUV 304 401 \
+        createDialog rol_RotateUV 304 461 \
             style:#(#style_titlebar, #style_sysmenu, #style_toolwindow) \
             parent:(windows.getMAXHWND()) lockWidth:true lockHeight:true
     )
