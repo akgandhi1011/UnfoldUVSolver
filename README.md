@@ -1,4 +1,4 @@
-# RotateUV Professional V3.4.1
+# RotateUV Professional V3.4.3
 
 Clean one-worker repository for the Rotate UV tool.
 
@@ -15,7 +15,7 @@ UV opening is performed by **3ds Max native Unfold3D** through MAXScript:
 
 There is no external unfold EXE, no libigl/Eigen checkout, no reference OBJ in the repository, and no seam-profile dropdown.
 
-## Important V3.4.1 runtime behavior
+## Important V3.4 runtime behavior
 
 `Generate` only analyzes the mesh and does not modify it.
 
@@ -33,9 +33,15 @@ Workflow:
 4. Unfold
 
 
-## V3.4.1 UI alignment update
+## V3.4.3 professional UI layout
 
-The compact rollout now follows the requested order:
+The ROTATE block is now arranged as two balanced rows: five evenly spaced preset controls on the first row, then Custom Angle, CCW and CW on the second row.
+
+The SEAM / UNFOLD / STRAIGHTEN block is now one compact icon toolbar. The extra `PRO MINIMAL SEAMS` and `Seams -> Max Unfold` labels were removed; all existing commands remain available and their behavior is unchanged.
+
+Bottom / Top / Left / Right buttons continue to use the supplied icon artwork.
+
+The compact rollout follows this order:
 
 1. MODE
 2. ROTATE
@@ -54,9 +60,9 @@ The native Unfold3D MAXScript methods are available in 3ds Max 2022.2 and newer.
 1. Create a new empty GitHub repository.
 2. Upload the **contents** of this folder to the repository root.
 3. Open **Actions**.
-4. Select **Build RotateUV Professional V3.4.1**.
+4. Select **Build RotateUV Professional V3.4.3**.
 5. Click **Run workflow**.
-6. Download the artifact named `RotateUV-Professional-V3.4.1-Windows`.
+6. Download the artifact named `RotateUV-Professional-V3.4.3-Windows`.
 
 The artifact contains:
 
@@ -105,3 +111,8 @@ Additional segment-count sweeps were run before packaging:
 These sweeps are validation only; they are **not stored as runtime files**.
 
 The actual 3ds Max UV result cannot be executed in this build environment because 3ds Max itself is not available here. V3.4 specifically fixes the integration issue found in the earlier package by resetting the UV mapping before applying the newly generated seams.
+
+
+## Alignment icon asset
+
+Keep `RotateUV_AlignBounds.png` and `RotateUV_AlignBounds_Mask.png` beside `Rotate_UV_PRO_NATIVE_UNFOLD_V2.ms` (or in the same `RotateUVAtlas` scripts folder). They supply the Bottom / Top / Left / Right alignment button artwork.

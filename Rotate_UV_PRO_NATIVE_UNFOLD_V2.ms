@@ -33,6 +33,14 @@
 
 global RotateUV_Open
 global RotateUV_FindUVEditorHWND
+global RotateUV_SourceDir
+
+try
+(
+    local rotateUVSourceFile = getSourceFileName()
+    RotateUV_SourceDir = if rotateUVSourceFile != undefined and rotateUVSourceFile != "" then getFilenamePath rotateUVSourceFile else ""
+)
+catch(RotateUV_SourceDir = "")
 
 -- Find the floating Unwrap UV editor so Rotate UV can stay above it.
 fn RotateUV_FindUVEditorHWND =
@@ -91,17 +99,18 @@ fn RotateUV_Open =
         checkButton chk_capture "CAPTURE ISLANDS" pos:[101,42] width:102 height:18 highlightColor:(color 55 150 70) tooltip:"Capture the current UV shell scope for repeated rotation commands."
         button btn_help "?" pos:[273,42] width:18 height:18 tooltip:"About / Help"
 
-        -- ROTATE is full-width, matching the requested compact layout.
+        -- ROTATE - two balanced rows: presets above, custom-angle controls below.
         groupBox grp_presets "ROTATE" pos:[6,70] width:292 height:90
-        button btn_m90 "" pos:[17,88] width:34 height:28 iconName:@"UVWUnwrapDialog\Rotate-90" iconSize:[21,21] tooltip:"Rotate captured shells -90 degrees."
-        button btn_m45 "-45" pos:[68,88] width:34 height:28 tooltip:"Rotate captured shells -45 degrees."
-        button btn_p45 "+45" pos:[118,88] width:34 height:28 tooltip:"Rotate captured shells +45 degrees."
-        button btn_p90 "" pos:[168,88] width:34 height:28 iconName:@"UVWUnwrapDialog\Rotate90" iconSize:[21,21] tooltip:"Rotate captured shells +90 degrees."
-        button btn_180 "180" pos:[238,88] width:40 height:28 tooltip:"Rotate captured shells 180 degrees."
+        button btn_m90 "" pos:[17,88] width:40 height:28 iconName:@"UVWUnwrapDialog\Rotate-90" iconSize:[21,21] tooltip:"Rotate captured shells -90 degrees."
+        button btn_m45 "-45" pos:[72,88] width:40 height:28 tooltip:"Rotate captured shells -45 degrees."
+        button btn_p45 "+45" pos:[127,88] width:40 height:28 tooltip:"Rotate captured shells +45 degrees."
+        button btn_p90 "" pos:[182,88] width:40 height:28 iconName:@"UVWUnwrapDialog\Rotate90" iconSize:[21,21] tooltip:"Rotate captured shells +90 degrees."
+        button btn_180 "180" pos:[237,88] width:40 height:28 tooltip:"Rotate captured shells 180 degrees."
 
-        spinner spn_angle "Custom Angle:" pos:[17,124] width:154 fieldWidth:48 range:[0.0,360.0,15.0] type:#float scale:1.0
-        button btn_ccw "CCW" pos:[190,121] width:40 height:23 tooltip:"Rotate counter-clockwise by Custom Angle."
-        button btn_cw "CW" pos:[238,121] width:40 height:23 tooltip:"Rotate clockwise by Custom Angle."
+        label lbl_customAngle "Custom Angle" pos:[17,126] width:82 height:16
+        spinner spn_angle "" pos:[100,122] width:72 fieldWidth:52 range:[0.0,360.0,15.0] type:#float scale:1.0 tooltip:"Custom rotation angle in degrees."
+        button btn_ccw "CCW" pos:[185,121] width:44 height:23 tooltip:"Rotate counter-clockwise by Custom Angle."
+        button btn_cw "CW" pos:[236,121] width:44 height:23 tooltip:"Rotate clockwise by Custom Angle."
 
         -- ALIGN is one full-width row: orient H/V, then Bottom / Top / Left / Right.
         groupBox grp_align "ALIGN" pos:[6,165] width:292 height:55
@@ -127,29 +136,64 @@ fn RotateUV_Open =
         spinner spn_spacing "Padding:" pos:[205,282] width:84 fieldWidth:40 range:[0.0,100.0,0.01] type:#float scale:0.001 tooltip:"Exact UV-space gap between arranged shell bounding boxes."
         label lbl_arrangeScope "Selected shells only   |   No selection = all shells" pos:[14,309] width:276 height:15 align:#center
 
-        -- SEAM / UNFOLD / STRAIGHTEN - explicit seam-first workflow.
-        groupBox grp_unfold "SEAM / UNFOLD / STRAIGHTEN" pos:[6,338] width:292 height:91
+        -- SEAM / UNFOLD / STRAIGHTEN - single compact professional toolbar.
+        groupBox grp_unfold "SEAM / UNFOLD / STRAIGHTEN" pos:[6,338] width:292 height:54
 
-        -- Row 1: native seam optimization. Generate never changes the Max mesh/UV topology.
-        button btn_seamAnalyze "" pos:[14,352] width:34 height:29 iconName:@"EditUVW\FlattenByPolygonAngle" iconSize:[22,22] tooltip:"Generate Professional Auto Seam - one automatic topology-aware Minimal-Seam policy. No profile selection. Proposal only; the mesh is unchanged until Apply."
-        button btn_seamPreview "" pos:[54,352] width:34 height:29 iconName:@"EditUVW\EditSeams" iconSize:[22,22] tooltip:"Preview Native Auto Seam - selects the proposed internal seam edges on the current Max mesh. Open mesh borders are not proposed."
-        button btn_seamApply "" pos:[94,352] width:34 height:29 iconName:@"EditUVW\ConvertEdgeToSeams" iconSize:[22,22] tooltip:"Apply Native Auto Seam - rebuilds the UV mapping from a clean state, then replaces the Peel/Pelt seam set with this proposal."
-        label lbl_autoSeamMode "PRO MINIMAL SEAMS" pos:[139,358] width:145 height:16 align:#center tooltip:"One automatic structural seam mode. No seam-profile dropdown: the planner decides the appropriate cut strategy from topology and shape."
-
-        -- Row 2: solve and finishing tools.
-        button btn_unfold "" pos:[18,389] width:34 height:31 iconName:@"EditUVW\QuickPeel" iconSize:[23,23] tooltip:"Unfold - uses 3ds Max Unfold3D from the applied seam set. No second external unfold worker."
-        button btn_optimize "" pos:[58,389] width:34 height:31 iconName:@"EditUVW\RelaxUntilFlat" iconSize:[23,23] tooltip:"Optimize - gentle Unfold3D relaxation. It never creates or changes seams."
-        button btn_straightenUV "" pos:[98,389] width:34 height:31 iconName:@"EditUVW\StraightenSelection" iconSize:[23,23] tooltip:"Straighten UV - rectangularize selected quad-grid UV patches. Preserves patch center and 3D-proportional row/column spacing."
-        button btn_straightenShell "" pos:[138,389] width:34 height:31 iconName:@"MainUI\Shell" iconSize:[23,23] tooltip:"Straighten Shell - promote selection to complete shells and rectangularize each valid quad-grid shell independently."
-        label lbl_unfoldScope "Seams -> Max Unfold" pos:[176,396] width:112 height:16 align:#center tooltip:"Recommended workflow: Generate -> Preview -> Apply -> Unfold. Auto Seam uses one external worker; UV opening uses 3ds Max Unfold3D."
+        -- Keep every existing command in one row; no explanatory text inside the toolbar.
+        button btn_seamAnalyze "" pos:[14,355] width:34 height:29 iconName:@"EditUVW\FlattenByPolygonAngle" iconSize:[22,22] tooltip:"Generate Professional Auto Seam - one automatic topology-aware Minimal-Seam policy. No profile selection. Proposal only; the mesh is unchanged until Apply."
+        button btn_seamPreview "" pos:[54,355] width:34 height:29 iconName:@"EditUVW\EditSeams" iconSize:[22,22] tooltip:"Preview Native Auto Seam - selects the proposed internal seam edges on the current Max mesh. Open mesh borders are not proposed."
+        button btn_seamApply "" pos:[94,355] width:34 height:29 iconName:@"EditUVW\ConvertEdgeToSeams" iconSize:[22,22] tooltip:"Apply Native Auto Seam - rebuilds the UV mapping from a clean state, then replaces the Peel/Pelt seam set with this proposal."
+        button btn_unfold "" pos:[134,355] width:34 height:29 iconName:@"EditUVW\QuickPeel" iconSize:[22,22] tooltip:"Unfold - uses 3ds Max Unfold3D from the applied seam set. No second external unfold worker."
+        button btn_optimize "" pos:[174,355] width:34 height:29 iconName:@"EditUVW\RelaxUntilFlat" iconSize:[22,22] tooltip:"Optimize - gentle Unfold3D relaxation. It never creates or changes seams."
+        button btn_straightenUV "" pos:[214,355] width:34 height:29 iconName:@"EditUVW\StraightenSelection" iconSize:[22,22] tooltip:"Straighten UV - rectangularize selected quad-grid UV patches. Preserves patch center and 3D-proportional row/column spacing."
+        button btn_straightenShell "" pos:[254,355] width:34 height:29 iconName:@"MainUI\Shell" iconSize:[22,22] tooltip:"Straighten Shell - promote selection to complete shells and rectangularize each valid quad-grid shell independently."
 
         -- Slim footer: status left, creator credit right.
-        label lbl_status "Ready." pos:[7,435] width:190 height:17
-        dotNetControl lbl_credit "System.Windows.Forms.Label" pos:[203,435] width:96 height:17
+        label lbl_status "Ready." pos:[7,398] width:190 height:17
+        dotNetControl lbl_credit "System.Windows.Forms.Label" pos:[203,398] width:96 height:17
 
         ----------------------------------------------------------------------
         -- Helpers
         ----------------------------------------------------------------------
+        fn setupBoundAlignIcons =
+        (
+            local iconFile = ""
+            local maskFile = ""
+            if RotateUV_SourceDir != undefined and RotateUV_SourceDir != "" do
+            (
+                iconFile = RotateUV_SourceDir + "RotateUV_AlignBounds.png"
+                maskFile = RotateUV_SourceDir + "RotateUV_AlignBounds_Mask.png"
+            )
+
+            if iconFile == "" or maskFile == "" or not doesFileExist iconFile or not doesFileExist maskFile do
+            (
+                local roots = #(
+                    (getDir #userScripts),
+                    (getDir #scripts),
+                    ((getDir #userScripts) + "\\RotateUVAtlas"),
+                    ((getDir #scripts) + "\\RotateUVAtlas")
+                )
+                for root in roots while (iconFile == "" or maskFile == "" or not doesFileExist iconFile or not doesFileExist maskFile) do
+                (
+                    local i = root + "\\RotateUV_AlignBounds.png"
+                    local m = root + "\\RotateUV_AlignBounds_Mask.png"
+                    if doesFileExist i and doesFileExist m do
+                    (
+                        iconFile = i
+                        maskFile = m
+                    )
+                )
+            )
+
+            if iconFile != "" and maskFile != "" and doesFileExist iconFile and doesFileExist maskFile do
+            (
+                btn_alignBottom.images = #(iconFile, maskFile, 4, 1, 1, 1, 1, false, false)
+                btn_alignTop.images = #(iconFile, maskFile, 4, 2, 2, 2, 2, false, false)
+                btn_alignLeft.images = #(iconFile, maskFile, 4, 3, 3, 3, 3, false, false)
+                btn_alignRight.images = #(iconFile, maskFile, 4, 4, 4, 4, 4, false, false)
+            )
+        )
+
         fn setStatus txt =
         (
             lbl_status.text = txt
@@ -3911,6 +3955,7 @@ Use Auto Seam: Generate -> Preview -> Apply, or define seams manually in Edit UV
 
         on rol_RotateUV open do
         (
+            setupBoundAlignIcons()
             lbl_credit.text = "Created by akg_ai"
             lbl_credit.textAlign = (dotNetClass "System.Drawing.ContentAlignment").MiddleRight
             lbl_credit.foreColor = (dotNetClass "System.Drawing.Color").FromArgb 145 145 145
@@ -3927,13 +3972,13 @@ Use Auto Seam: Generate -> Preview -> Apply, or define seams manually in Edit UV
 
     try
     (
-        createDialog rol_RotateUV 304 461 \
+        createDialog rol_RotateUV 304 424 \
             style:#(#style_titlebar, #style_sysmenu, #style_toolwindow) \
             parent:toolParentHWND lockWidth:true lockHeight:true
     )
     catch
     (
-        createDialog rol_RotateUV 304 461 \
+        createDialog rol_RotateUV 304 424 \
             style:#(#style_titlebar, #style_sysmenu, #style_toolwindow) \
             parent:(windows.getMAXHWND()) lockWidth:true lockHeight:true
     )

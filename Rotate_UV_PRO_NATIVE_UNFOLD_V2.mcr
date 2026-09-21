@@ -12,6 +12,7 @@
     Requirements:
       - Rotate_UV_PRO_NATIVE_UNFOLD_V2.ms on the script path (or run it once).
       - RotateUV_AutoSeam.exe beside the .ms or in <scripts>\RotateUVAtlas\.
+      - RotateUV_AlignBounds.png and RotateUV_AlignBounds_Mask.png beside the .ms for the four bound-align icons.
       - 3ds Max 2022.2+ for native Unfold3D; 2026/2027 are the target versions.
 */
 

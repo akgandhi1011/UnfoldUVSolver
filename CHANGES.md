@@ -1,3 +1,17 @@
+# V3.4.3 - Professional Compact Toolbar
+
+- Reworked ROTATE into two balanced rows: evenly spaced presets above, Custom Angle + CCW/CW below.
+- Removed the in-panel `PRO MINIMAL SEAMS` and `Seams -> Max Unfold` text labels.
+- Moved every existing Seam / Unfold / Optimize / Straighten command onto one compact icon row.
+- Reduced rollout height while preserving all existing tool behavior and alignment-icon support.
+- AutoSeam worker and UV algorithms are unchanged from V3.4.2.
+
+# V3.4.2 - Alignment Icons
+
+- Replaced the Bottom / Top / Left / Right text labels with the four supplied alignment icons.
+- Alignment commands and all other Rotate UV behavior are unchanged.
+- Added `RotateUV_AlignBounds.png` plus `RotateUV_AlignBounds_Mask.png` beside the MaxScript for the four icon buttons.
+
 # Changes
 
 ## V3.4.1 - Align Layout + Four Shell Edge Align Tools
